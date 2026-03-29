@@ -15,6 +15,7 @@ export default function SchoolDashboard() {
   // Tablas y Estado de Inquilinos
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('');
   const [activeTab, setActiveTab] = useState('active'); // active | deleted
   const [usersLoading, setUsersLoading] = useState(false);
 
@@ -236,6 +237,7 @@ export default function SchoolDashboard() {
   };
 
   const filteredUsers = users.filter(u => {
+    if (filterRole && u.role_id !== filterRole) return false;
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
     const fullName = `${u.first_name} ${u.last_name || ''}`.toLowerCase();
@@ -350,9 +352,22 @@ export default function SchoolDashboard() {
               ><UserX size={16} /> Papelera</button>
             </div>
             
-            <div style={{ position: 'relative' }}>
-              <Search size={16} color="var(--color-text-muted)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
-              <input type="text" placeholder="Buscar empleado..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ padding: '0.5rem 1rem 0.5rem 2rem', borderRadius: '8px', border: '1px solid rgba(45, 55, 63, 0.1)', outline: 'none', width: '220px', fontSize: '0.85rem' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <select 
+                value={filterRole} 
+                onChange={(e) => setFilterRole(e.target.value)}
+                style={{ padding: '0.45rem 1rem', borderRadius: '8px', border: '1px solid rgba(45, 55, 63, 0.1)', outline: 'none', fontSize: '0.85rem', color: filterRole ? 'var(--color-text)' : 'var(--color-text-muted)', background: 'white', cursor: 'pointer' }}
+              >
+                <option value="">Todos los perfiles</option>
+                {roles.map(r => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </select>
+
+              <div style={{ position: 'relative' }}>
+                <Search size={16} color="var(--color-text-muted)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                <input type="text" placeholder="Buscar empleado..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ padding: '0.5rem 1rem 0.5rem 2rem', borderRadius: '8px', border: '1px solid rgba(45, 55, 63, 0.1)', outline: 'none', width: '220px', fontSize: '0.85rem' }} />
+              </div>
             </div>
           </div>
 
