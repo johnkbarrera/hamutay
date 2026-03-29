@@ -171,7 +171,7 @@ export default function SchoolDashboard() {
   };
 
   const handleRestore = async (userId) => {
-    if (!window.confirm('¿Restaurar acceso a este usuario del inquilino?')) return;
+    if (!window.confirm('¿Restaurar acceso a este usuario del colegio?')) return;
     try {
       const token = localStorage.getItem('token');
       await fetch(`http://localhost:8000/platform/schools/${id}/users/${userId}/restore`, {
@@ -280,7 +280,7 @@ export default function SchoolDashboard() {
           
           <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid rgba(45, 55, 63, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ margin: 0, color: 'var(--color-text)', fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Shield size={20} color="var(--color-tertiary)" /> Inquilinos del Colegio
+              <Shield size={20} color="var(--color-tertiary)" /> Usuarios del Colegio
             </h2>
             <button onClick={openCreateModal} style={{ background: 'var(--color-tertiary)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}>
               <UserPlus size={16} /> Agregar Perfil
@@ -356,7 +356,7 @@ export default function SchoolDashboard() {
 
       </main>
 
-      {/* MODAL para Crear / Editar INQUILINO */}
+      {/* MODAL para Crear / Editar USUARIO */}
       {isModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(45, 55, 63, 0.5)', backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: 'white', padding: '2rem', borderRadius: '16px', width: '90%', maxWidth: '700px', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
