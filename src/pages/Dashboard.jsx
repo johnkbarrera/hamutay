@@ -6,11 +6,14 @@ import {
   Users, 
   BookOpen, 
   Receipt, 
-  Settings 
+  Settings,
+  Building2,
+  ShieldCheck
 } from 'lucide-react';
 import PlatformTable from '../components/PlatformTable';
 import ModuleUsers from './modules/ModuleUsers';
 import ModuleSchools from './modules/ModuleSchools';
+import ModuleSchoolRoles from './modules/ModuleSchoolRoles';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -58,12 +61,21 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
           <SidebarItem id="overview" icon={LayoutDashboard} label="Resumen" />
           <SidebarItem id="users" icon={Users} label="Usuarios Admin" />
+          
+          <div style={{ marginTop: '1.2rem', marginBottom: '0.3rem', paddingLeft: '1rem', fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Colegios
+          </div>
           <SidebarItem id="schools" icon={BookOpen} label="Colegios Registrados" />
+          <SidebarItem id="school-roles" icon={ShieldCheck} label="Roles y Accesos" />
+          
+          <div style={{ marginTop: '1.2rem', marginBottom: '0.3rem', paddingLeft: '1rem', fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Operaciones y Negocio
+          </div>
           <SidebarItem id="plans" icon={Settings} label="Planes Comerciales" />
-          <SidebarItem id="invoices" icon={Receipt} label="Facturas" />
+          <SidebarItem id="invoices" icon={Receipt} label="Facturación" />
         </nav>
         
         <div style={{ padding: '1.5rem 1rem', borderTop: '1px solid rgba(45, 55, 63, 0.1)' }}>
@@ -92,6 +104,7 @@ export default function Dashboard() {
             {activeModule === 'overview' && 'Panel General'}
             {activeModule === 'users' && 'Gestión de Usuarios'}
             {activeModule === 'schools' && 'Infraestructura de Colegios'}
+            {activeModule === 'school-roles' && 'Gestión de Roles y Permisos'}
             {activeModule === 'plans' && 'Portafolio de Planes'}
             {activeModule === 'invoices' && 'Cobranza y Facturación'}
           </h1>
@@ -131,6 +144,10 @@ export default function Dashboard() {
         
         {activeModule === 'schools' && (
           <ModuleSchools />
+        )}
+
+        {activeModule === 'school-roles' && (
+          <ModuleSchoolRoles />
         )}
 
         {activeModule === 'plans' && (

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import SchoolDashboard from './pages/SchoolDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Layout para Rutas Públicas (agrega el Header y Footer)
@@ -68,6 +69,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/schools/:id" 
+          element={
+            <ProtectedRoute>
+              <SchoolDashboard />
             </ProtectedRoute>
           } 
         />

@@ -1,44 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Loader2, Plus, Edit2, Trash2, Building2, Search, X, AlertCircle, RefreshCcw, LayoutGrid, AlertTriangle, UploadCloud } from 'lucide-react';
-
-const StorageImage = ({ fileKey, alt, style, fallbackName }) => {
-  const [url, setUrl] = useState(null);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    if (!fileKey) {
-      setError(true);
-      return;
-    }
-    if (fileKey.startsWith('blob:') || fileKey.startsWith('http')) {
-      setUrl(fileKey);
-      return;
-    }
-    
-    let isMounted = true;
-    const token = localStorage.getItem('token');
-    fetch(`http://localhost:8000/platform/storage/view?key=${encodeURIComponent(fileKey)}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    .then(r => { if (!r.ok) throw new Error('R2 Error'); return r.json(); })
-    .then(d => { if (isMounted) { if (d.url) setUrl(d.url); else setError(true); } })
-    .catch(() => { if (isMounted) setError(true); });
-    
-    return () => { isMounted = false; };
-  }, [fileKey]);
-
-  if (error || !url) {
-    if (url === null && !error) {
-       return <div style={{ ...style, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.05)' }}><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /></div>;
-    }
-    const avatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fallbackName || alt || 'NN') + '&background=random';
-    return <img src={avatar} alt={alt} style={style} />;
-  }
-
-  return <img src={url} alt={alt} referrerPolicy="no-referrer" style={style} onError={() => setError(true)} />;
-};
+import { useNavigate } from 'react-router-dom';
+import { Loader2, Plus, Edit2, Trash2, Building2, Search, X, AlertCircle, RefreshCcw, LayoutGrid, AlertTriangle, UploadCloud, Eye } from 'lucide-react';
+import StorageImage from '../../components/StorageImage';
 
 export default function ModuleSchools() {
+  const navigate = useNavigate();
   const [schools, setSchools] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('active'); // 'active' o 'deleted'
@@ -390,6 +356,9 @@ export default function ModuleSchools() {
                       ) : (
                         <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
                          {/* Ojo: La doc dice que Support no puede editar todo, aquí mostramos el full modal a manera general, el backend se encarga de rebotar 403 si el rol no alcanza */}
+                          <button onClick={() => navigate(`/dashboard/schools/${sch.id}`)} style={{ background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-primary)', cursor: 'pointer', padding: '0.4rem', borderRadius: '6px' }} title="Ver Dashboard de Colegio">
+                            <Eye size={16} />
+                          </button>
                           <button onClick={() => openEditModal(sch)} style={{ background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-text-muted)', cursor: 'pointer', padding: '0.4rem', borderRadius: '6px' }} title="Modificar Contrato">
                             <Edit2 size={16} />
                           </button>
