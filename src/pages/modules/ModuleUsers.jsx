@@ -3,6 +3,7 @@ import { Loader2, Plus, Edit2, Trash2, Shield, Search, X, AlertCircle, RefreshCc
 
 export default function ModuleUsers() {
   const [users, setUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -164,6 +165,15 @@ export default function ModuleUsers() {
     }
   };
 
+  const filteredUsers = users.filter(u => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    const fullName = `${u.first_name} ${u.last_name || ''}`.toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    const doc = (u.document_number || '').toLowerCase();
+    return fullName.includes(term) || email.includes(term) || doc.includes(term);
+  });
+
   return (
     <div style={{ background: 'white', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(45, 55, 63, 0.1)', boxShadow: '0 4px 15px rgba(45, 55, 63, 0.03)' }}>
       {/* Cabecera del Módulo */}
@@ -177,9 +187,21 @@ export default function ModuleUsers() {
           </p>
         </div>
         
-        <button onClick={openCreateModal} className="btn" style={{ background: 'var(--color-tertiary)', color: 'white', gap: '0.5rem', padding: '0.6rem 1.2rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500' }}>
-          <Plus size={18} /> Nuevo Usuario
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ position: 'relative' }}>
+            <Search size={18} color="var(--color-text-muted)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+            <input 
+              type="text" 
+              placeholder="Buscar usuario o correo..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ padding: '0.6rem 1rem 0.6rem 2.2rem', borderRadius: '8px', border: '1px solid rgba(45, 55, 63, 0.2)', outline: 'none', width: '220px', fontSize: '0.9rem' }} 
+            />
+          </div>
+          <button onClick={openCreateModal} className="btn" style={{ background: 'var(--color-tertiary)', color: 'white', gap: '0.5rem', padding: '0.6rem 1.2rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500' }}>
+            <Plus size={18} /> Nuevo Usuario
+          </button>
+        </div>
       </div>
 
       {error && !isModalOpen && (
@@ -208,7 +230,7 @@ export default function ModuleUsers() {
               </tr>
             </thead>
             <tbody>
-              {users.map(u => {
+              {filteredUsers.map(u => {
                 // ELIMINACION LOGICA: is_active == false or deleted_at is not null
                 const isDeleted = u.is_active === false || u.deleted_at;
                 
@@ -252,8 +274,8 @@ export default function ModuleUsers() {
                   </tr>
                 );
               })}
-              {users.length === 0 && (
-                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '3rem' }}>No hay usuarios registrados.</td></tr>
+              {filteredUsers.length === 0 && (
+                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '3rem' }}>No se encontraron coincidencias.</td></tr>
               )}
             </tbody>
           </table>
