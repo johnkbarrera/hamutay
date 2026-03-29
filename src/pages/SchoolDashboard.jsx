@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Loader2, ArrowLeft, Building2, UserPlus, Shield, Mail, Phone, MapPin, Globe, Search, UserCheck, UserX, X, Edit2, Trash2, RefreshCcw, UploadCloud, User } from 'lucide-react';
+import { Loader2, ArrowLeft, Building2, UserPlus, Shield, Mail, Phone, MapPin, Globe, Search, UserCheck, UserX, X, Edit2, Trash2, RefreshCcw, UploadCloud, User, Eye } from 'lucide-react';
 import StorageImage from '../components/StorageImage';
 
 export default function SchoolDashboard() {
@@ -20,6 +20,7 @@ export default function SchoolDashboard() {
   const [usersLoading, setUsersLoading] = useState(false);
 
   // Modal para Usuario
+  const [viewingUser, setViewingUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -412,6 +413,7 @@ export default function SchoolDashboard() {
                             <button onClick={() => handleRestore(u.id)} style={{ background: 'rgba(105, 151, 126, 0.1)', border: 'none', color: 'var(--color-tertiary)', cursor: 'pointer', padding: '0.5rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: '600' }} title="Restaurar Usuario"><RefreshCcw size={14} /> Recuperar</button>
                           ) : (
                             <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                              <button onClick={() => setViewingUser(u)} style={{ background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-primary)', cursor: 'pointer', padding: '0.4rem', borderRadius: '6px' }} title="Ver Detalle"><Eye size={16} /></button>
                               <button onClick={() => openEditModal(u)} style={{ background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-text-muted)', cursor: 'pointer', padding: '0.4rem', borderRadius: '6px' }} title="Modificar"><Edit2 size={16} /></button>
                               <button onClick={() => handleDelete(u.id)} style={{ background: 'rgba(211, 73, 55, 0.05)', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', padding: '0.4rem', borderRadius: '6px' }} title="A Papelera"><Trash2 size={16} /></button>
                             </div>
@@ -520,6 +522,59 @@ export default function SchoolDashboard() {
             .input-label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; font-weight: 600; color: var(--color-text); }
             .sys-input { width: 100%; padding: 0.7rem; border-radius: 8px; border: 1px solid rgba(45, 55, 63, 0.2); outline: none; }
           `}</style>
+        </div>
+      )}
+
+      {/* MODAL para VER DETALLES DE USUARIO */}
+      {viewingUser && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(45, 55, 63, 0.5)', backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'white', padding: '2.5rem', borderRadius: '16px', width: '90%', maxWidth: '500px', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'center' }}>
+                <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(45, 55, 63, 0.05)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.05)' }}>
+                  {viewingUser.avatar_path ? <StorageImage fileKey={viewingUser.avatar_path} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={30} color="var(--color-text-muted)" />}
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.4rem', margin: 0, color: 'var(--color-text)' }}>{viewingUser.first_name} {viewingUser.last_name || ''}</h2>
+                  <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>{getRoleName(viewingUser.role_id).toUpperCase()}</p>
+                </div>
+              </div>
+              <button onClick={() => setViewingUser(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}><X size={24} /></button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '2rem', background: 'rgba(248, 244, 238, 0.3)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(0,0,0,0.1)', paddingBottom: '0.5rem' }}>
+                <span style={{ color: 'var(--color-text-muted)', fontWeight: 600, fontSize: '0.85rem' }}>Documento:</span>
+                <span style={{ color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 500 }}>{viewingUser.id_type} {viewingUser.id_number}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(0,0,0,0.1)', paddingBottom: '0.5rem' }}>
+                <span style={{ color: 'var(--color-text-muted)', fontWeight: 600, fontSize: '0.85rem' }}>Correo:</span>
+                <span style={{ color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 500 }}>{viewingUser.email}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(0,0,0,0.1)', paddingBottom: '0.5rem' }}>
+                <span style={{ color: 'var(--color-text-muted)', fontWeight: 600, fontSize: '0.85rem' }}>Móvil:</span>
+                <span style={{ color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 500 }}>{viewingUser.phone || 'No registrado'}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(0,0,0,0.1)', paddingBottom: '0.5rem' }}>
+                <span style={{ color: 'var(--color-text-muted)', fontWeight: 600, fontSize: '0.85rem' }}>F. Nacimiento:</span>
+                <span style={{ color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 500 }}>{viewingUser.birth_date ? new Date(viewingUser.birth_date).toLocaleDateString() : 'No registrada'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', borderBottom: '1px dashed rgba(0,0,0,0.1)', paddingBottom: '0.5rem' }}>
+                <span style={{ color: 'var(--color-text-muted)', fontWeight: 600, fontSize: '0.85rem' }}>Dirección:</span>
+                <span style={{ color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 500 }}>{viewingUser.address || 'No registrada'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <span style={{ color: 'var(--color-text-muted)', fontWeight: 600, fontSize: '0.85rem' }}>Contacto de Emergencia:</span>
+                <span style={{ color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 500 }}>
+                  {viewingUser.emergency_contact_name ? `${viewingUser.emergency_contact_name} (${viewingUser.emergency_contact_phone || 'Sin número'})` : 'No registrada'}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem' }}>
+              <button type="button" onClick={() => setViewingUser(null)} style={{ background: 'var(--color-bg)', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--color-text)', padding: '0.6rem 1.5rem', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>Cerrar Detalle</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
