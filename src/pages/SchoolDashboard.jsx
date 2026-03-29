@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Loader2, ArrowLeft, Building2, UserPlus, Shield, Mail, Phone, MapPin, Globe, Search, UserCheck, UserX, X, Edit2, Trash2, RefreshCcw, UploadCloud, User, Eye } from 'lucide-react';
+import { Loader2, ArrowLeft, Building2, UserPlus, Shield, Mail, Phone, MapPin, Globe, Search, UserCheck, UserX, X, Edit2, Trash2, RefreshCcw, UploadCloud, User, Eye, Menu, LogOut } from 'lucide-react';
 import StorageImage from '../components/StorageImage';
 
 export default function SchoolDashboard() {
@@ -18,6 +18,22 @@ export default function SchoolDashboard() {
   const [filterRole, setFilterRole] = useState('');
   const [activeTab, setActiveTab] = useState('active'); // active | deleted
   const [usersLoading, setUsersLoading] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Parse user data from localStorage for the top header
+  let userProfile = { first_name: 'Usuario', role: 'invitado' };
+  try {
+    const rawUser = localStorage.getItem('user');
+    if (rawUser) {
+      userProfile = JSON.parse(rawUser);
+    }
+  } catch(e) {}
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
+  };
 
   // Modal para Usuario
   const [viewingUser, setViewingUser] = useState(null);
@@ -271,22 +287,51 @@ export default function SchoolDashboard() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg)' }}>
-      {/* Mini Sidebar to maintain dashboard context */}
-      <aside style={{ width: '80px', background: 'white', borderRight: '1px solid rgba(45, 55, 63, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '1.5rem', flexShrink: 0 }}>
-        <button 
-          onClick={() => navigate('/dashboard')}
-          style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(45,55,63,0.05)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)', transition: 'all 0.2s', marginBottom: '2rem' }}
-          title="Volver al inicio"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(105, 151, 126, 0.1)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-tertiary)' }} title="Sub-Dashboard Escolar">
-          <Building2 size={20} />
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg)' }}>
+      {/* Global Navbar (Top Header) */}
+      <header style={{ height: '70px', background: 'white', borderBottom: '1px solid rgba(45, 55, 63, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem', flexShrink: 0, zIndex: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+          <button onClick={() => setIsCollapsed(!isCollapsed)} style={{ background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--color-text)', transition: 'background 0.2s' }}>
+            <Menu size={20} />
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <img src="/bear-logo.png" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
+            <h3 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--color-text)', fontWeight: '700' }}>Hamutay</h3>
+          </div>
         </div>
-      </aside>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+             <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--color-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+               {(userProfile.first_name || userProfile.name || 'U').charAt(0).toUpperCase()}
+             </div>
+             <div style={{ display: 'flex', flexDirection: 'column' }}>
+               <span style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--color-text)' }}>{userProfile.first_name || userProfile.name || 'Usuario'}</span>
+               <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'capitalize' }}>{userProfile.role || 'Super Admin'}</span>
+             </div>
+          </div>
+          <button onClick={handleLogout} style={{ background: 'rgba(211, 73, 55, 0.1)', border: 'none', color: '#B91C1C', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0.5rem', borderRadius: '8px' }} title="Cerrar Sesión">
+            <LogOut size={18} />
+          </button>
+        </div>
+      </header>
 
-      <main style={{ flex: 1, padding: '2.5rem', overflowY: 'auto' }}>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {/* Nav Lateral Collapsable */}
+        <aside style={{ width: isCollapsed ? '0px' : '80px', background: 'white', borderRight: isCollapsed ? 'none' : '1px solid rgba(45, 55, 63, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '1.5rem', flexShrink: 0, transition: 'all 0.3s cubic-bezier(0.2, 0, 0, 1)', overflow: 'hidden', opacity: isCollapsed ? 0 : 1, zIndex: 5 }}>
+          <button 
+            onClick={() => navigate('/dashboard')}
+            style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(45,55,63,0.05)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)', transition: 'all 0.2s', marginBottom: '2rem' }}
+            title="Volver al inicio"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(105, 151, 126, 0.1)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-tertiary)' }} title="Sub-Dashboard Escolar">
+            <Building2 size={20} />
+          </div>
+        </aside>
+
+        <main style={{ flex: 1, padding: '2.5rem', overflowY: 'auto' }}>
         
         {/* CABECERA (Detalles Superiores) */}
         <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', display: 'flex', alignItems: 'flex-start', gap: '2rem', border: '1px solid rgba(45, 55, 63, 0.1)', boxShadow: '0 4px 15px rgba(45, 55, 63, 0.03)', marginBottom: '2rem' }}>
@@ -432,6 +477,7 @@ export default function SchoolDashboard() {
         </div>
 
       </main>
+      </div>
 
       {/* MODAL para Crear / Editar USUARIO */}
       {isModalOpen && (
