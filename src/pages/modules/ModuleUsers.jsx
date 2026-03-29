@@ -4,6 +4,7 @@ import { Loader2, Plus, Edit2, Trash2, Shield, Search, X, AlertCircle, RefreshCc
 export default function ModuleUsers() {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDeleted, setShowDeleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -30,13 +31,27 @@ export default function ModuleUsers() {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/platform/users', {
+      
+      const responseActive = await fetch('http://localhost:8000/platform/users', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Error al descargar los usuarios');
+      const dataActive = await responseActive.json();
+      if (!responseActive.ok) throw new Error(dataActive.detail || 'Error al descargar los usuarios activos');
       
-      setUsers(Array.isArray(data) ? data : (data.items || []));
+      let allUsers = Array.isArray(dataActive) ? dataActive : (dataActive.items || []);
+
+      if (showDeleted) {
+        const responseDeleted = await fetch('http://localhost:8000/platform/users/deleted', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const dataDeleted = await responseDeleted.json();
+        if (responseDeleted.ok) {
+           const deletedArr = Array.isArray(dataDeleted) ? dataDeleted : (dataDeleted.items || []);
+           allUsers = [...allUsers, ...deletedArr];
+        }
+      }
+      
+      setUsers(allUsers);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,7 +61,7 @@ export default function ModuleUsers() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [showDeleted]);
 
   const openCreateModal = () => {
     setEditingUser(null);
@@ -188,6 +203,16 @@ export default function ModuleUsers() {
         </div>
         
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+            <input 
+              type="checkbox" 
+              checked={showDeleted} 
+              onChange={(e) => setShowDeleted(e.target.checked)} 
+              style={{ accentColor: 'var(--color-primary)' }}
+            />
+            {showDeleted ? 'Ocultar Eliminados' : 'Ver Eliminados'}
+          </label>
+
           <div style={{ position: 'relative' }}>
             <Search size={18} color="var(--color-text-muted)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
             <input 
