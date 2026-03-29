@@ -1,16 +1,43 @@
-# React + Vite
+# Hamutay Platform Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plataforma principal de gestión e infraestructura administrativa para los colegios suscritos a Hamutay.
 
-Currently, two official plugins are available:
+## 🚀 Cómo iniciar el proyecto en local
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Para ejecutar el entorno de frontend (React + Vite) en tu máquina local, sigue estos sencillos pasos:
 
-## React Compiler
+### 1. Requisitos Previos
+- Asegúrate de tener instalado [Node.js](https://nodejs.org/) (versión 18 o superior recomendada).
+- Para un funcionamiento pleno, recuerda tener el servidor de Backend (`hamutay_api` en FastAPI) corriendo en `http://localhost:8000` (esto es necesario para el login y obtención/subida de datos).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Instalación de Dependencias
+Abre una terminal asegurándote de estar en la raíz de este proyecto (`hamutay`) e instala los paquetes necesarios ejecutando:
 
-## Expanding the ESLint configuration
+```bash
+npm install
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 3. Ejecutar el Servidor de Desarrollo
+Una vez descargadas todas las dependencias, inicializa el servidor local de Vite con el siguiente comando:
+
+```bash
+npm run dev
+```
+
+La consola te indicará que el proyecto está disponible localmente, por diseño de Vite esto generalmente es en la ruta: **http://localhost:5173** 
+
+*Haz `Ctrl + C` (o `Cmd + C`) en la terminal para detener el servidor web cuando hayas terminado.*
+
+### 4. Compilación para Producción (Opcional)
+Cuando estés listo para subir los cambios a un entorno real o de staging, puedes empaquetar la aplicación con:
+```bash
+npm run build
+```
+Esto creará una carpeta `/dist` lista para ser desplegada en tu proveedor favorito (Cloudflare Pages, Vercel, AWS S3, etc.).
+
+---
+
+### Mantenimiento y Tecnologías
+- **Frameworks:** React 19, Vite, React Router V7
+- **Iconografía:** Lucide React
+- **Almacenamiento:** Conexión para Presigned URLs (S3 / R2) directa desde el frontend evitando saturar el backend.

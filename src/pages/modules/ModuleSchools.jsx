@@ -1,6 +1,43 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, Plus, Edit2, Trash2, Building2, Search, X, AlertCircle, RefreshCcw, LayoutGrid, AlertTriangle, UploadCloud } from 'lucide-react';
 
+const StorageImage = ({ fileKey, alt, style, fallbackName }) => {
+  const [url, setUrl] = useState(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!fileKey) {
+      setError(true);
+      return;
+    }
+    if (fileKey.startsWith('blob:') || fileKey.startsWith('http')) {
+      setUrl(fileKey);
+      return;
+    }
+    
+    let isMounted = true;
+    const token = localStorage.getItem('token');
+    fetch(`http://localhost:8000/platform/storage/view?key=${encodeURIComponent(fileKey)}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(r => { if (!r.ok) throw new Error('R2 Error'); return r.json(); })
+    .then(d => { if (isMounted) { if (d.url) setUrl(d.url); else setError(true); } })
+    .catch(() => { if (isMounted) setError(true); });
+    
+    return () => { isMounted = false; };
+  }, [fileKey]);
+
+  if (error || !url) {
+    if (url === null && !error) {
+       return <div style={{ ...style, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.05)' }}><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /></div>;
+    }
+    const avatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fallbackName || alt || 'NN') + '&background=random';
+    return <img src={avatar} alt={alt} style={style} />;
+  }
+
+  return <img src={url} alt={alt} referrerPolicy="no-referrer" style={style} onError={() => setError(true)} />;
+};
+
 export default function ModuleSchools() {
   const [schools, setSchools] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,8 +137,8 @@ export default function ModuleSchools() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecciona un archivo de imagen (JPG, PNG, WebP).');
+      if (file.type && !file.type.startsWith('image/')) {
+        alert('Por favor, selecciona un archivo de imagen válido.');
         return;
       }
       setSelectedLogo(file);
@@ -118,45 +155,45 @@ export default function ModuleSchools() {
     }));
   };
 
-  // Lógica Maestra de Carga asíncrona hacia S3 / R2 usando Presigned URLs con rastreo intenso
+  // Lógica Maestra de Carga asíncrona hacia R2 usando Presigned URLs Privados
   const uploadLogoToCloud = async (schoolId, file, token) => {
-    let upload_url, public_url;
+    let upload_url, file_key;
     
-    // 1. Obtener boleto (URL de carga)
+    // 1. Obtener boleto de Subida y Key interna
     try {
       const preRes = await fetch('http://localhost:8000/platform/storage/presigned-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ entity: 'school', entity_id: schoolId, filename: file.name, content_type: file.type })
+        body: JSON.stringify({ entity: 'school', entity_id: schoolId, filename: file.name, content_type: file.type || 'image/jpeg' })
       });
       const data = await preRes.json();
       if (!preRes.ok) throw new Error(data.detail || 'Firma rechazada');
       upload_url = data.upload_url;
-      public_url = data.public_url;
+      file_key = data.key;
     } catch(e) {
       throw new Error('Fallo al obtener Presigned URL del Backend: ' + e.message);
     }
 
-    // 2. Transferencia Binaria Directa (React -> Nube) escapando del Backend
+    // 2. Transferencia Binaria Directa
     try {
       const uploadRes = await fetch(upload_url, {
         method: 'PUT',
-        headers: { 'Content-Type': file.type },
+        headers: { 'Content-Type': file.type || 'image/jpeg' },
         body: file
       });
-      if (!uploadRes.ok) throw new Error('Cloudflare/AWS rechazó la transacción.');
+      if (!uploadRes.ok) throw new Error('Cloudflare rechazó la subida (403).');
     } catch(e) {
-      throw new Error('ERROR CORS R2/S3 (Failed to fetch): Tu Bucket en Cloudflare R2 debe tener una política de CORS configurada (En las opciones del bucket, "CORS Settings" deben permitir el origin "http://localhost:5173", methods ["PUT", "GET"], headers ["*"]). Detalle técnico: ' + e.message);
+      throw new Error('CORS Falló: Revisa la configuración CORS en tu Cloudflare R2: ' + e.message);
     }
 
-    // 3. Confirmación (Cierre de Transacción)
+    // 3. Confirmación ligando el KEY a la DB
     try {
       const confirmRes = await fetch('http://localhost:8000/platform/storage/confirm', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ entity: 'school', entity_id: schoolId, public_url: public_url })
+        body: JSON.stringify({ entity: 'school', entity_id: schoolId, key: file_key })
       });
-      if (!confirmRes.ok) throw new Error('El backend no incrustó la URL.');
+      if (!confirmRes.ok) throw new Error('El backend no enlazó la Key.');
     } catch(e) {
        throw new Error('Fallo en la confirmación a Base de Datos: ' + e.message);
     }
@@ -319,13 +356,12 @@ export default function ModuleSchools() {
                   <tr key={sch.id} style={{ opacity: activeTab === 'deleted' ? 0.5 : 1, transition: 'background 0.2s', borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                         {sch.logo_url ? (
-                            <img src={sch.logo_url} alt="logo" style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(0,0,0,0.1)' }} />
-                         ) : (
-                            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'rgba(45, 55, 63, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-secondary)' }}>
-                               <Building2 size={18} />
-                            </div>
-                         )}
+                         <StorageImage 
+                            fileKey={sch.logo_url} 
+                            fallbackName={sch.name} 
+                            alt="logo" 
+                            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(0,0,0,0.1)' }} 
+                         />
                          <div>
                             <div style={{ fontWeight: '600', color: 'var(--color-text)', marginBottom: '0.2rem', textDecoration: activeTab === 'deleted' ? 'line-through' : 'none' }}>
                               {sch.name}
@@ -392,7 +428,7 @@ export default function ModuleSchools() {
                  
                  <fieldset style={{ border: '1px dashed rgba(105, 151, 126, 0.5)', borderRadius: '12px', padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(105, 151, 126, 0.02)' }}>
                      <legend style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-tertiary)' }}>Isotipo Emblema (S3 / R2 Logo)</legend>
-                     <input type="file" accept="image/png, image/jpeg, image/webp" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
+                     <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
                      
                      <div 
                         onClick={() => fileInputRef.current.click()} 
@@ -400,7 +436,7 @@ export default function ModuleSchools() {
                         title="Haz clic para subir un logo"
                      >
                        {logoPreview ? (
-                          <img src={logoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <StorageImage fileKey={logoPreview} fallbackName={formData.name} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                        ) : (
                           <UploadCloud size={28} color="var(--color-text-muted)" />
                        )}
