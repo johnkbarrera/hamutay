@@ -9,6 +9,7 @@ import {
   Settings 
 } from 'lucide-react';
 import PlatformTable from '../components/PlatformTable';
+import ModuleUsers from './modules/ModuleUsers';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -124,18 +125,7 @@ export default function Dashboard() {
 
         {/* Dynamic Data Modules mapping directly to endpoints documented in platform_api.md */}
         {activeModule === 'users' && (
-          <PlatformTable 
-            title="Usuarios Plataforma" 
-            description="Administradores de Hamutay (Superadmin, Ventas, Soporte, etc)." 
-            endpoint="users" 
-            columns={[
-              { header: 'ID / Doc', accessor: r => r.document_number || 'N/A' },
-              { header: 'Nombres', accessor: r => r.first_name + ' ' + (r.last_name || '') },
-              { header: 'Correo', accessor: r => r.email },
-              { header: 'Activo', accessor: r => r.is_active },
-              { header: 'Rol', accessor: r => r.role_obj?.name || r.role || 'Sin Rol' }
-            ]} 
-          />
+          <ModuleUsers />
         )}
         
         {activeModule === 'schools' && (
