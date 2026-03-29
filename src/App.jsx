@@ -94,7 +94,7 @@ function App() {
           </div>
           
           <div className="glass-card">
-            <div className="feature-icon-wrapper" style={{ color: '#fff', background: 'rgba(255, 255, 255, 0.1)' }}>
+            <div className="feature-icon-wrapper" style={{ color: 'var(--color-bg)', background: 'var(--color-text)' }}>
               <Users size={28} />
             </div>
             <h3>Multi-Roles</h3>
