@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Loader2, Plus, Edit2, Trash2, Shield, Search, X, 
-  AlertCircle, UserCheck, Eye
+  AlertCircle, UserCheck, Eye, GraduationCap, Briefcase, UserPlus
 } from 'lucide-react';
 import StorageImage from '../../components/StorageImage';
 
@@ -18,6 +18,7 @@ export default function ModuleSchoolUsers({ schoolId }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingUser, setEditingUser] = useState(null); 
   const [selectedUser, setSelectedUser] = useState(null);
+  const [modalMode, setModalMode] = useState('generic'); // 'generic', 'profesor', 'alumno'
 
   // Form State
   const [formData, setFormData] = useState({
@@ -80,8 +81,27 @@ export default function ModuleSchoolUsers({ schoolId }) {
     fetchRoles();
   }, [schoolId]);
 
-  const openCreateModal = () => {
+  const openCreateModal = (mode = 'generic') => {
     setEditingUser(null);
+    setModalMode(mode);
+    
+    // Tries to find a matching role for the specific mode
+    let targetRoleId = roles[0]?.id || '';
+    if (mode === 'profesor') {
+      const r = roles.find(x => 
+        x.name.toLowerCase().includes('profesor') || 
+        x.name.toLowerCase().includes('docente') || 
+        x.name.toLowerCase().includes('maestro')
+      );
+      if (r) targetRoleId = r.id;
+    } else if (mode === 'alumno') {
+      const r = roles.find(x => 
+        x.name.toLowerCase().includes('alumno') || 
+        x.name.toLowerCase().includes('estudiante')
+      );
+      if (r) targetRoleId = r.id;
+    }
+
     setFormData({
       email: '', 
       password: '', 
@@ -89,7 +109,7 @@ export default function ModuleSchoolUsers({ schoolId }) {
       last_name: '',
       id_type: 'DNI', 
       id_number: '', 
-      role_id: roles[0]?.id || '', 
+      role_id: targetRoleId, 
       phone: '', 
       birth_date: '', 
       address: '',
@@ -212,9 +232,17 @@ export default function ModuleSchoolUsers({ schoolId }) {
           <Shield size={20} color="var(--color-primary)" /> Usuarios del Colegio
         </h2>
         
-        <button onClick={openCreateModal} style={{ background: 'var(--color-tertiary)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', fontSize: '0.9rem' }}>
-          <Plus size={16} /> Agregar Colaborador
-        </button>
+        <div style={{ display: 'flex', gap: '0.8rem' }}>
+          <button onClick={() => openCreateModal('generic')} style={{ background: 'rgba(45, 55, 63, 0.05)', color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}>
+            <UserPlus size={16} /> Nuevo Usuario
+          </button>
+          <button onClick={() => openCreateModal('profesor')} style={{ background: 'rgba(224, 159, 57, 0.1)', color: 'var(--color-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}>
+            <Briefcase size={16} /> Nuevo Profesor
+          </button>
+          <button onClick={() => openCreateModal('alumno')} style={{ background: 'var(--color-tertiary)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}>
+            <GraduationCap size={16} /> Nuevo Alumno
+          </button>
+        </div>
       </div>
 
       {/* Search Contextbar */}
@@ -312,8 +340,25 @@ export default function ModuleSchoolUsers({ schoolId }) {
       {isModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(45, 55, 63, 0.5)', backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: 'white', padding: '2rem', borderRadius: '20px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.4rem' }}>{editingUser ? 'Editar Colaborador' : 'Nuevo Colaborador'}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                {editingUser 
+                  ? <Edit2 size={24} color="var(--color-primary)" /> 
+                  : modalMode === 'profesor' 
+                    ? <Briefcase size={24} color="var(--color-secondary)" /> 
+                    : modalMode === 'alumno' 
+                      ? <GraduationCap size={24} color="var(--color-tertiary)" /> 
+                      : <UserPlus size={24} color="var(--color-primary)" />}
+                <h2 style={{ fontSize: '1.4rem', margin: 0, color: 'var(--color-text)' }}>
+                  {editingUser 
+                    ? 'Editar Registro' 
+                    : modalMode === 'profesor' 
+                      ? 'Crear Profesor' 
+                      : modalMode === 'alumno' 
+                        ? 'Inscribir Alumno' 
+                        : 'Nuevo Usuario'}
+                </h2>
+              </div>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}><X size={24} /></button>
             </div>
             
@@ -345,9 +390,18 @@ export default function ModuleSchoolUsers({ schoolId }) {
                   </div>
                 </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', fontWeight: 600 }}>Rol Académico/Admin</label>
-                  <select name="role_id" required value={formData.role_id} onChange={handleFormChange} style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid rgba(45, 55, 63, 0.2)', outline: 'none' }}>
+                <div style={{ opacity: (!editingUser && modalMode !== 'generic') ? 0.7 : 1 }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', fontWeight: 600 }}>
+                    Rol Académico/Admin {(!editingUser && modalMode !== 'generic') && '(Auto)'}
+                  </label>
+                  <select 
+                    name="role_id" 
+                    required 
+                    value={formData.role_id} 
+                    onChange={handleFormChange} 
+                    disabled={!editingUser && modalMode !== 'generic'}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid rgba(45, 55, 63, 0.2)', outline: 'none', background: (!editingUser && modalMode !== 'generic') ? '#f9f9f9' : 'white' }}
+                  >
                     <option value="" disabled>Seleccione un rol</option>
                     {roles.map(r => (
                       <option key={r.id} value={r.id}>{r.name}</option>
@@ -396,7 +450,13 @@ export default function ModuleSchoolUsers({ schoolId }) {
                 <button type="button" onClick={() => setIsModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', fontWeight: 600, cursor: 'pointer' }}>Cancelar</button>
                 <button type="submit" disabled={isSubmitting} style={{ background: 'var(--color-primary)', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '10px', border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   {isSubmitting && <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />}
-                  {editingUser ? 'Guardar Cambios' : 'Registrar Colaborador'}
+                  {editingUser 
+                    ? 'Guardar Cambios' 
+                    : modalMode === 'profesor'
+                      ? 'Registrar Profesor'
+                      : modalMode === 'alumno'
+                        ? 'Confirmar Matrícula'
+                        : 'Crear Usuario'}
                 </button>
               </div>
             </form>
