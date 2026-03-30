@@ -12,6 +12,7 @@ import ModuleSchoolUsers from './modules/ModuleSchoolUsers';
 export default function SchoolPortal() {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAdminExpanded, setIsAdminExpanded] = useState(true);
   const [activeModule, setActiveModule] = useState('home');
   const [meData, setMeData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -148,12 +149,37 @@ export default function SchoolPortal() {
             </div>
             <SidebarItem id="messages" icon={MessageSquare} label="Mensajes" />
 
-            <div style={{ marginTop: '1.2rem', marginBottom: '0.3rem', paddingLeft: isCollapsed ? '0' : '1rem', textAlign: isCollapsed ? 'center' : 'left', fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {isCollapsed ? '—' : 'Administración de usuarios'}
+            <div 
+              onClick={() => !isCollapsed && setIsAdminExpanded(!isAdminExpanded)}
+              style={{ 
+                marginTop: '1.2rem', 
+                marginBottom: '0.3rem', 
+                padding: isCollapsed ? '0.5rem 0' : '0.5rem 1rem', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                cursor: isCollapsed ? 'default' : 'pointer',
+                borderRadius: '8px',
+                transition: 'background 0.2rem'
+              }}
+              onMouseEnter={(e) => !isCollapsed && (e.currentTarget.style.background = 'rgba(45, 55, 63, 0.03)')}
+              onMouseLeave={(e) => !isCollapsed && (e.currentTarget.style.background = 'transparent')}
+            >
+              <div style={{ textAlign: isCollapsed ? 'center' : 'left', fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', flex: 1 }}>
+                {isCollapsed ? '—' : 'Administración de usuarios'}
+              </div>
+              {!isCollapsed && (
+                isAdminExpanded ? <ChevronDown size={14} color="var(--color-text-muted)" /> : <ChevronRight size={14} color="var(--color-text-muted)" />
+              )}
             </div>
-            <SidebarItem id="school-users" icon={Users} label="Usuarios del Colegio" />
-            <SidebarItem id="profesor" icon={Briefcase} label="Profesor" />
-            <SidebarItem id="alumno" icon={GraduationCap} label="Estudiantes" />
+
+            {(isAdminExpanded || isCollapsed) && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <SidebarItem id="school-users" icon={Users} label="Usuarios del Colegio" />
+                <SidebarItem id="profesor" icon={Briefcase} label="Profesor" />
+                <SidebarItem id="alumno" icon={GraduationCap} label="Estudiantes" />
+              </div>
+            )}
           </nav>
         </aside>
 
