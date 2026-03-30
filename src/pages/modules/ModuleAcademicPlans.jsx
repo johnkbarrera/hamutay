@@ -76,11 +76,15 @@ function FormModal({ title, open, onClose, onSubmit, submitting, children }) {
 const DURATION_TYPES = [
   { value: 'annual', label: 'Anual' },
   { value: 'semester', label: 'Semestral' },
+  { value: 'summer', label: 'Verano' },
+  { value: 'winter', label: 'Invierno' },
 ];
 const PERIOD_TYPES = [
+  { value: 'monthly', label: 'Mensual' },
   { value: 'bimester', label: 'Bimestral' },
   { value: 'trimester', label: 'Trimestral' },
   { value: 'quarter', label: 'Cuatrimestral' },
+  { value: 'seasonal', label: 'Estacional' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -123,12 +127,12 @@ function TabPlans({ canWrite }) {
   const [form, setForm] = useState({ name: '', duration_type: 'annual', period_type: 'bimester', period_count: '' });
   const [submitting, setSubmitting] = useState(false);
 
-  const fetch_ = async () => { setLoading(true); try { const d = await apiFetch(`${API}/academic/plans`); setData(Array.isArray(d) ? d : []); } catch(e){} finally { setLoading(false); } };
+  const fetch_ = async () => { setLoading(true); try { const d = await apiFetch(`${API}/academic/plans`); setData(Array.isArray(d) ? d : []); } catch (e) { } finally { setLoading(false); } };
   useEffect(() => { fetch_(); }, []);
 
   const openCreate = () => { setEditing(null); setForm({ name: '', duration_type: 'annual', period_type: 'bimester', period_count: '' }); setModal(true); };
   const openEdit = (row) => { setEditing(row); setForm({ name: row.name, duration_type: row.duration_type || 'annual', period_type: row.period_type || 'bimester', period_count: row.period_count ?? '' }); setModal(true); };
-  const handleDelete = async (row) => { if (!confirm(`¿Eliminar plan "${row.name}"?`)) return; try { await apiFetch(`${API}/platform/academic/plans/${row.plan_id}`, { method: 'DELETE' }); fetch_(); } catch(e) { alert(e.message); } };
+  const handleDelete = async (row) => { if (!confirm(`¿Eliminar plan "${row.name}"?`)) return; try { await apiFetch(`${API}/platform/academic/plans/${row.plan_id}`, { method: 'DELETE' }); fetch_(); } catch (e) { alert(e.message); } };
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setSubmitting(true);
@@ -137,7 +141,7 @@ function TabPlans({ canWrite }) {
       if (editing) { await apiFetch(`${API}/platform/academic/plans/${editing.plan_id}`, { method: 'PUT', body: JSON.stringify(body) }); }
       else { await apiFetch(`${API}/platform/academic/plans`, { method: 'POST', body: JSON.stringify(body) }); }
       setModal(false); fetch_();
-    } catch(e) { alert(e.message); } finally { setSubmitting(false); }
+    } catch (e) { alert(e.message); } finally { setSubmitting(false); }
   };
 
   const durationLabel = (v) => DURATION_TYPES.find(d => d.value === v)?.label || v || '—';
@@ -203,7 +207,7 @@ function TabTerms({ canWrite }) {
       const [t, p] = await Promise.all([apiFetch(`${API}/academic/terms`), apiFetch(`${API}/academic/plans`)]);
       setData(Array.isArray(t) ? t : []);
       setPlans(Array.isArray(p) ? p : []);
-    } catch(e){} finally { setLoading(false); }
+    } catch (e) { } finally { setLoading(false); }
   };
   useEffect(() => { fetch_(); }, []);
 
@@ -212,7 +216,7 @@ function TabTerms({ canWrite }) {
 
   const openCreate = () => { setEditing(null); setForm({ plan_id: plans[0]?.plan_id || '', name: '', order: '' }); setModal(true); };
   const openEdit = (row) => { setEditing(row); setForm({ plan_id: row.plan_id, name: row.name, order: row.order ?? '' }); setModal(true); };
-  const handleDelete = async (row) => { if (!confirm(`¿Eliminar período "${row.name}"?`)) return; try { await apiFetch(`${API}/platform/academic/terms/${row.term_id}`, { method: 'DELETE' }); fetch_(); } catch(e) { alert(e.message); } };
+  const handleDelete = async (row) => { if (!confirm(`¿Eliminar período "${row.name}"?`)) return; try { await apiFetch(`${API}/platform/academic/terms/${row.term_id}`, { method: 'DELETE' }); fetch_(); } catch (e) { alert(e.message); } };
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setSubmitting(true);
@@ -221,7 +225,7 @@ function TabTerms({ canWrite }) {
       if (editing) { await apiFetch(`${API}/platform/academic/terms/${editing.term_id}`, { method: 'PUT', body: JSON.stringify({ name: body.name, order: body.order }) }); }
       else { await apiFetch(`${API}/platform/academic/terms`, { method: 'POST', body: JSON.stringify(body) }); }
       setModal(false); fetch_();
-    } catch(e) { alert(e.message); } finally { setSubmitting(false); }
+    } catch (e) { alert(e.message); } finally { setSubmitting(false); }
   };
 
   if (loading) return <div style={{ textAlign: 'center', padding: '2rem' }}><Loader2 size={28} style={{ animation: 'spin 1s linear infinite', color: 'var(--color-secondary)' }} /></div>;
@@ -289,7 +293,7 @@ function TabPlanCourses({ canWrite }) {
       setData(Array.isArray(pc) ? pc : []);
       setPlans(Array.isArray(p) ? p : []);
       setGradeCourses(Array.isArray(gc) ? gc : []);
-    } catch(e){} finally { setLoading(false); }
+    } catch (e) { } finally { setLoading(false); }
   };
   useEffect(() => { fetch_(); }, []);
 
@@ -298,14 +302,14 @@ function TabPlanCourses({ canWrite }) {
   const filtered = filterPlan ? data.filter(pc => pc.plan_id === filterPlan) : data;
 
   const openCreate = () => { setForm({ plan_id: plans[0]?.plan_id || '', grade_course_id: gradeCourses[0]?.grade_course_id || '' }); setModal(true); };
-  const handleDelete = async (row) => { if (!confirm('¿Desasignar este curso del plan?')) return; try { await apiFetch(`${API}/platform/academic/plan-courses/${row.plan_course_id}`, { method: 'DELETE' }); fetch_(); } catch(e) { alert(e.message); } };
+  const handleDelete = async (row) => { if (!confirm('¿Desasignar este curso del plan?')) return; try { await apiFetch(`${API}/platform/academic/plan-courses/${row.plan_course_id}`, { method: 'DELETE' }); fetch_(); } catch (e) { alert(e.message); } };
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setSubmitting(true);
     try {
       await apiFetch(`${API}/platform/academic/plan-courses`, { method: 'POST', body: JSON.stringify(form) });
       setModal(false); fetch_();
-    } catch(e) { alert(e.message); } finally { setSubmitting(false); }
+    } catch (e) { alert(e.message); } finally { setSubmitting(false); }
   };
 
   if (loading) return <div style={{ textAlign: 'center', padding: '2rem' }}><Loader2 size={28} style={{ animation: 'spin 1s linear infinite', color: 'var(--color-secondary)' }} /></div>;
@@ -325,7 +329,7 @@ function TabPlanCourses({ canWrite }) {
       <DataTable columns={[
         { header: 'Plan', accessor: r => planName(r.plan_id) },
         { header: 'Curso (Grado)', accessor: r => gcName(r.grade_course_id) },
-      ]} data={filtered} onEdit={() => {}} onDelete={handleDelete} canWrite={canWrite} hideEdit />
+      ]} data={filtered} onEdit={() => { }} onDelete={handleDelete} canWrite={canWrite} hideEdit />
 
       <FormModal title="Asignar Curso a Plan" open={modal} onClose={() => setModal(false)} onSubmit={handleSubmit} submitting={submitting}>
         <div style={{ marginBottom: '1rem' }}>
