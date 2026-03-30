@@ -32,7 +32,7 @@ export default function SelectSchool() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:8000/schools/auth/select-school', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/schools/auth/select-school`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

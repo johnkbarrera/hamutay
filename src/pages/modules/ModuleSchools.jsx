@@ -50,8 +50,8 @@ export default function ModuleSchools() {
       const token = localStorage.getItem('token');
       
       const endpoint = activeTab === 'active' 
-        ? 'http://localhost:8000/platform/schools' 
-        : 'http://localhost:8000/platform/schools/deleted';
+        ? `${import.meta.env.VITE_API_URL}/platform/schools` 
+        : `${import.meta.env.VITE_API_URL}/platform/schools/deleted`;
 
       const response = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -127,7 +127,7 @@ export default function ModuleSchools() {
     
     // 1. Obtener boleto de Subida y Key interna
     try {
-      const preRes = await fetch('http://localhost:8000/platform/storage/presigned-url', {
+      const preRes = await fetch(`${import.meta.env.VITE_API_URL}/platform/storage/presigned-url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ entity: 'school', entity_id: schoolId, filename: file.name, content_type: file.type || 'image/jpeg' })
@@ -154,7 +154,7 @@ export default function ModuleSchools() {
 
     // 3. Confirmación ligando el KEY a la DB
     try {
-      const confirmRes = await fetch('http://localhost:8000/platform/storage/confirm', {
+      const confirmRes = await fetch(`${import.meta.env.VITE_API_URL}/platform/storage/confirm`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ entity: 'school', entity_id: schoolId, key: file_key })
@@ -172,8 +172,8 @@ export default function ModuleSchools() {
 
     const token = localStorage.getItem('token');
     const endpoint = editingSchool 
-      ? `http://localhost:8000/platform/schools/${editingSchool.id}` 
-      : 'http://localhost:8000/platform/schools';
+      ? `${import.meta.env.VITE_API_URL}/platform/schools/${editingSchool.id}` 
+      : `${import.meta.env.VITE_API_URL}/platform/schools`;
     const method = editingSchool ? 'PATCH' : 'POST';
 
     try {
@@ -213,7 +213,7 @@ export default function ModuleSchools() {
     if (!window.confirm('¿Deseas suspender este Colegio moviéndolo a la papelera (Soft Delete)?')) return;
     try {
        const token = localStorage.getItem('token');
-       const response = await fetch(`http://localhost:8000/platform/schools/${id}`, {
+       const response = await fetch(`${import.meta.env.VITE_API_URL}/platform/schools/${id}`, {
          method: 'DELETE',
          headers: { 'Authorization': `Bearer ${token}` }
        });
@@ -226,7 +226,7 @@ export default function ModuleSchools() {
     if (!window.confirm('¿Estás seguro de reactivar este colegio para reconectarlo al sistema?')) return;
     try {
        const token = localStorage.getItem('token');
-       const response = await fetch(`http://localhost:8000/platform/schools/${id}/restore`, {
+       const response = await fetch(`${import.meta.env.VITE_API_URL}/platform/schools/${id}/restore`, {
          method: 'POST',
          headers: { 'Authorization': `Bearer ${token}` }
        });

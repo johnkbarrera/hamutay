@@ -66,13 +66,13 @@ export default function SchoolDashboard() {
       const headers = { 'Authorization': `Bearer ${token}` };
 
       // 1. Fetch school details
-      const schRes = await fetch(`http://localhost:8000/platform/schools/${id}`, { headers });
+      const schRes = await fetch(`${import.meta.env.VITE_API_URL}/platform/schools/${id}`, { headers });
       if (!schRes.ok) throw new Error('No se pudo cargar la información del colegio.');
       const schData = await schRes.json();
       setSchool(schData);
 
       // 2. Fetch global roles (para el dropdown del form de creación)
-      const rolesRes = await fetch(`http://localhost:8000/platform/roles`, { headers });
+      const rolesRes = await fetch(`${import.meta.env.VITE_API_URL}/platform/roles`, { headers });
       if (rolesRes.ok) {
         let rData = await rolesRes.json();
         if (rData && rData.items) rData = rData.items; 
@@ -90,8 +90,8 @@ export default function SchoolDashboard() {
       setUsersLoading(true);
       const token = localStorage.getItem('token');
       const endpoint = activeTab === 'active' 
-        ? `http://localhost:8000/platform/schools/${id}/users`
-        : `http://localhost:8000/platform/schools/${id}/users/deleted`;
+        ? `${import.meta.env.VITE_API_URL}/platform/schools/${id}/users`
+        : `${import.meta.env.VITE_API_URL}/platform/schools/${id}/users/deleted`;
 
       const res = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -156,7 +156,7 @@ export default function SchoolDashboard() {
 
   const uploadAvatarToCloud = async (userId, file, token) => {
     try {
-      const preRes = await fetch('http://localhost:8000/platform/storage/presigned-url', {
+      const preRes = await fetch(`${import.meta.env.VITE_API_URL}/platform/storage/presigned-url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ entity: 'school_user', entity_id: userId, filename: file.name, content_type: file.type || 'image/jpeg' })
@@ -171,7 +171,7 @@ export default function SchoolDashboard() {
       });
       if (!uploadRes.ok) throw new Error('Cloudflare rechazó el avatar');
 
-      const confirmRes = await fetch('http://localhost:8000/platform/storage/confirm', {
+      const confirmRes = await fetch(`${import.meta.env.VITE_API_URL}/platform/storage/confirm`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ entity: 'school_user', entity_id: userId, key: preData.key })
@@ -194,7 +194,7 @@ export default function SchoolDashboard() {
       if (!payload.birth_date) payload.birth_date = null;
       if (editingUser && !payload.password) delete payload.password;
 
-      const url = editingUser ? `http://localhost:8000/platform/schools/${id}/users/${editingUser.id}` : `http://localhost:8000/platform/schools/${id}/users`;
+      const url = editingUser ? `${import.meta.env.VITE_API_URL}/platform/schools/${id}/users/${editingUser.id}` : `${import.meta.env.VITE_API_URL}/platform/schools/${id}/users`;
       const method = editingUser ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
@@ -229,7 +229,7 @@ export default function SchoolDashboard() {
     if (!window.confirm('¿Desactivar y mover este usuario a la papelera? Perderá su acceso.')) return;
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:8000/platform/schools/${id}/users/${userId}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/platform/schools/${id}/users/${userId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -243,7 +243,7 @@ export default function SchoolDashboard() {
     if (!window.confirm('¿Restaurar acceso a este usuario del colegio?')) return;
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:8000/platform/schools/${id}/users/${userId}/restore`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/platform/schools/${id}/users/${userId}/restore`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

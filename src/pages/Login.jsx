@@ -19,7 +19,7 @@ export default function Login() {
     if (loginType === 'platform') {
       // ──── Platform Admin Login ────
       try {
-        const response = await fetch('http://localhost:8000/platform/auth/login', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/platform/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -40,7 +40,7 @@ export default function Login() {
     } else {
       // ──── School User Login (2-step flow) ────
       try {
-        const response = await fetch('http://localhost:8000/schools/auth/login', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/schools/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })

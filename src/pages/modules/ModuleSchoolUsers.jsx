@@ -65,7 +65,7 @@ export default function ModuleSchoolUsers({ schoolId, initialFilter = '' }) {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`http://localhost:8000/schools/${schoolId}/admin/users`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/schools/${schoolId}/admin/users`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -81,7 +81,7 @@ export default function ModuleSchoolUsers({ schoolId, initialFilter = '' }) {
   const fetchRoles = async () => {
     if (!schoolId) return;
     try {
-      const response = await fetch(`http://localhost:8000/schools/${schoolId}/admin/roles`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/schools/${schoolId}/admin/roles`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -180,8 +180,8 @@ export default function ModuleSchoolUsers({ schoolId, initialFilter = '' }) {
     setError(null);
 
     const endpoint = editingUser 
-      ? `http://localhost:8000/schools/${schoolId}/admin/users/${editingUser.id}` 
-      : `http://localhost:8000/schools/${schoolId}/admin/users`;
+      ? `${import.meta.env.VITE_API_URL}/schools/${schoolId}/admin/users/${editingUser.id}` 
+      : `${import.meta.env.VITE_API_URL}/schools/${schoolId}/admin/users`;
     const method = editingUser ? 'PUT' : 'POST';
 
     const payload = { ...formData };
@@ -218,7 +218,7 @@ export default function ModuleSchoolUsers({ schoolId, initialFilter = '' }) {
   const handleDelete = async (id) => {
     if (!window.confirm('¿Está seguro de eliminar este usuario?')) return;
     try {
-      const response = await fetch(`http://localhost:8000/schools/${schoolId}/admin/users/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/schools/${schoolId}/admin/users/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

@@ -31,7 +31,7 @@ export default function SchoolPortal() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:8000/schools/auth/me', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/schools/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Sesión expirada o inválida');

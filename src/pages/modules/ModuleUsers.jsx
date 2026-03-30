@@ -26,8 +26,8 @@ export default function ModuleUsers() {
       const token = localStorage.getItem('token');
       
       const endpoint = activeTab === 'active' 
-        ? 'http://localhost:8000/platform/users' 
-        : 'http://localhost:8000/platform/users/deleted';
+        ? `${import.meta.env.VITE_API_URL}/platform/users` 
+        : `${import.meta.env.VITE_API_URL}/platform/users/deleted`;
 
       const response = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -88,8 +88,8 @@ export default function ModuleUsers() {
 
     const token = localStorage.getItem('token');
     const endpoint = editingUser 
-      ? `http://localhost:8000/platform/users/${editingUser.id}` 
-      : 'http://localhost:8000/platform/users';
+      ? `${import.meta.env.VITE_API_URL}/platform/users/${editingUser.id}` 
+      : `${import.meta.env.VITE_API_URL}/platform/users`;
     const method = editingUser ? 'PATCH' : 'POST';
 
     const payload = { ...formData };
@@ -120,7 +120,7 @@ export default function ModuleUsers() {
     if (!window.confirm('¿Está seguro de mover este usuario a la papelera?')) return;
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/platform/users/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/platform/users/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -138,7 +138,7 @@ export default function ModuleUsers() {
     if (!window.confirm('¿Desea restaurar a este usuario y devolverle su acceso?')) return;
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/platform/users/${id}/restore`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/platform/users/${id}/restore`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

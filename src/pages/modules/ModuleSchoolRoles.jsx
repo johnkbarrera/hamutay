@@ -49,7 +49,7 @@ export default function ModuleSchoolRoles() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:8000/platform/roles`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/platform/roles`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -65,7 +65,7 @@ export default function ModuleSchoolRoles() {
     try {
       setPermsLoading(true);
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:8000/platform/roles/${roleId}/permissions`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/platform/roles/${roleId}/permissions`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -82,7 +82,7 @@ export default function ModuleSchoolRoles() {
     try {
       setRoleSubmitting(true);
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:8000/platform/roles`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/platform/roles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(newRole)
@@ -102,7 +102,7 @@ export default function ModuleSchoolRoles() {
     if(!window.confirm('¿Seguro de desvincular este Rol? Los administradores con este rol perderán acceso.')) return;
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:8000/platform/roles/${roleId}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/platform/roles/${roleId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -120,7 +120,7 @@ export default function ModuleSchoolRoles() {
       if (!existingPerm) return;
 
       const permId = existingPerm.id || existingPerm.permission_id;
-      await fetch(`http://localhost:8000/platform/roles/${selectedRole.id}/permissions/${permId}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/platform/roles/${selectedRole.id}/permissions/${permId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ is_allowed: !existingPerm.is_allowed })
