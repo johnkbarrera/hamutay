@@ -254,24 +254,24 @@ export default function SchoolPortal() {
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* QR Code Card */}
-                {meData.qr_code && (
-                  <div style={{ width: '200px', flexShrink: 0, background: 'white', borderRadius: '16px', padding: '1.5rem', border: '1px solid rgba(45, 55, 63, 0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mi Código QR</span>
-                    <div style={{ background: 'white', padding: '0.5rem', borderRadius: '10px', border: '1px solid rgba(45, 55, 63, 0.1)' }}>
-                      <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(meData.qr_code)}&color=2D373F&bgcolor=FFFFFF&margin=4`}
-                        alt="QR Code"
-                        style={{ width: '140px', height: '140px', display: 'block' }}
-                      />
+                  {/* Integrated QR Code */}
+                  {meData.qr_code && (
+                    <div style={{ width: '160px', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem', padding: '1.2rem', background: 'rgba(45, 55, 63, 0.02)', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Código QR</span>
+                      <div style={{ background: 'white', padding: '0.4rem', borderRadius: '8px', border: '1px solid rgba(45, 55, 63, 0.1)' }}>
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(meData.qr_code)}&color=2D373F&bgcolor=FFFFFF&margin=4`}
+                          alt="QR Code"
+                          style={{ width: '100px', height: '100px', display: 'block' }}
+                        />
+                      </div>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', fontFamily: 'monospace', textAlign: 'center', wordBreak: 'break-all', lineHeight: 1.2 }}>
+                        {meData.qr_code.substring(0, 15)}...
+                      </span>
                     </div>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', fontFamily: 'monospace', textAlign: 'center', wordBreak: 'break-all', lineHeight: 1.4 }}>
-                      {meData.qr_code}
-                    </span>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           )}
