@@ -5,12 +5,33 @@ import {
 } from 'lucide-react';
 import StorageImage from '../../components/StorageImage';
 
-export default function ModuleSchoolUsers({ schoolId }) {
+export default function ModuleSchoolUsers({ schoolId, initialFilter = '' }) {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRoleId, setSelectedRoleId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Sync selected role with initialFilter when roles are loaded or initialFilter changes
+  useEffect(() => {
+    if (roles.length > 0 && initialFilter) {
+      const filterLow = initialFilter.toLowerCase();
+      const target = roles.find(r => {
+        const nameLow = r.name.toLowerCase();
+        // Match specific role names or handle synonyms for students
+        if (filterLow === 'alumno' || filterLow === 'estudiante') {
+          return nameLow.includes('alumno') || nameLow.includes('estudiante');
+        }
+        return nameLow.includes(filterLow);
+      });
+      
+      if (target) setSelectedRoleId(target.id);
+      else setSelectedRoleId(''); 
+    } else if (roles.length > 0 && !initialFilter) {
+      setSelectedRoleId(''); 
+    }
+  }, [initialFilter, roles]);
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -212,10 +233,18 @@ export default function ModuleSchoolUsers({ schoolId }) {
   };
 
   const filteredUsers = users.filter(u => {
-    if (!searchTerm) return true;
+    // Search filter
     const term = searchTerm.toLowerCase();
     const fullName = `${u.first_name} ${u.last_name || ''}`.toLowerCase();
-    return fullName.includes(term) || (u.email || '').includes(term) || (u.id_number || '').includes(term);
+    const matchesSearch = !searchTerm || 
+      fullName.includes(term) || 
+      (u.email || '').includes(term) || 
+      (u.id_number || '').includes(term);
+
+    // Role filter
+    const matchesRole = !selectedRoleId || u.role_id === selectedRoleId;
+
+    return matchesSearch && matchesRole;
   });
 
   const getRoleName = (roleId) => {
@@ -229,24 +258,33 @@ export default function ModuleSchoolUsers({ schoolId }) {
       {/* Upper Toolbar */}
       <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid rgba(45, 55, 63, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ margin: 0, color: 'var(--color-text)', fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Shield size={20} color="var(--color-primary)" /> Usuarios del Colegio
+          <Shield size={20} color="var(--color-primary)" /> 
+          {initialFilter === 'profesor' ? 'Profesores' : initialFilter === 'alumno' ? 'Estudiantes' : 'Usuarios del Colegio'}
         </h2>
         
         <div style={{ display: 'flex', gap: '0.8rem' }}>
-          <button onClick={() => openCreateModal('generic')} style={{ background: 'rgba(45, 55, 63, 0.05)', color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}>
-            <UserPlus size={16} /> Nuevo Usuario
-          </button>
-          <button onClick={() => openCreateModal('profesor')} style={{ background: 'rgba(224, 159, 57, 0.1)', color: 'var(--color-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}>
-            <Briefcase size={16} /> Nuevo Profesor
-          </button>
-          <button onClick={() => openCreateModal('alumno')} style={{ background: 'var(--color-tertiary)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}>
-            <GraduationCap size={16} /> Nuevo Alumno
-          </button>
+          {(!initialFilter || initialFilter === '') && (
+            <button onClick={() => openCreateModal('generic')} style={{ background: 'rgba(45, 55, 63, 0.05)', color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}>
+              <UserPlus size={16} /> Nuevo Usuario
+            </button>
+          )}
+
+          {initialFilter === 'profesor' && (
+            <button onClick={() => openCreateModal('profesor')} style={{ background: 'rgba(224, 159, 57, 0.1)', color: 'var(--color-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}>
+              <Briefcase size={16} /> Registrar Profesor
+            </button>
+          )}
+
+          {initialFilter === 'alumno' && (
+            <button onClick={() => openCreateModal('alumno')} style={{ background: 'var(--color-tertiary)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500', fontSize: '0.85rem' }}>
+              <GraduationCap size={16} /> Registrar Estudiante
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Search Contextbar */}
-      <div style={{ padding: '1rem 2rem', background: 'rgba(248, 244, 238, 0.5)', borderBottom: '1px solid rgba(45, 55, 63, 0.05)', display: 'flex', justifyContent: 'flex-end' }}>
+      {/* Search and filter Contextbar */}
+      <div style={{ padding: '1rem 2rem', background: 'rgba(248, 244, 238, 0.5)', borderBottom: '1px solid rgba(45, 55, 63, 0.05)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
         <div style={{ position: 'relative' }}>
           <Search size={16} color="var(--color-text-muted)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
           <input 
@@ -256,6 +294,31 @@ export default function ModuleSchoolUsers({ schoolId }) {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ padding: '0.5rem 1rem 0.5rem 2.2rem', borderRadius: '8px', border: '1px solid rgba(45, 55, 63, 0.1)', outline: 'none', width: '300px', fontSize: '0.85rem' }} 
           />
+        </div>
+        
+        <div style={{ position: 'relative' }}>
+          <select 
+            value={selectedRoleId}
+            onChange={(e) => setSelectedRoleId(e.target.value)}
+            disabled={!!initialFilter}
+            style={{ 
+              padding: '0.5rem 1rem', 
+              borderRadius: '8px', 
+              border: '1px solid rgba(45, 55, 63, 0.1)', 
+              outline: 'none', 
+              fontSize: '0.85rem', 
+              background: !!initialFilter ? 'rgba(45, 55, 63, 0.03)' : 'white', 
+              color: 'var(--color-text)', 
+              cursor: !!initialFilter ? 'default' : 'pointer', 
+              minWidth: '180px',
+              opacity: !!initialFilter ? 0.8 : 1
+            }}
+          >
+            <option value="">{initialFilter ? 'Filtrando...' : 'Todos los Tipos'}</option>
+            {roles.map(r => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -390,17 +453,17 @@ export default function ModuleSchoolUsers({ schoolId }) {
                   </div>
                 </div>
 
-                <div style={{ opacity: (!editingUser && modalMode !== 'generic') ? 0.7 : 1 }}>
+                <div style={{ opacity: (!editingUser && (modalMode !== 'generic' || initialFilter)) ? 0.7 : 1 }}>
                   <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', fontWeight: 600 }}>
-                    Rol Académico/Admin {(!editingUser && modalMode !== 'generic') && '(Auto)'}
+                    Rol Académico/Admin {(!editingUser && (modalMode !== 'generic' || initialFilter)) && '(Auto)'}
                   </label>
                   <select 
                     name="role_id" 
                     required 
                     value={formData.role_id} 
                     onChange={handleFormChange} 
-                    disabled={!editingUser && modalMode !== 'generic'}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid rgba(45, 55, 63, 0.2)', outline: 'none', background: (!editingUser && modalMode !== 'generic') ? '#f9f9f9' : 'white' }}
+                    disabled={!editingUser && (modalMode !== 'generic' || initialFilter)}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid rgba(45, 55, 63, 0.2)', outline: 'none', background: (!editingUser && (modalMode !== 'generic' || initialFilter)) ? '#f9f9f9' : 'white' }}
                   >
                     <option value="" disabled>Seleccione un rol</option>
                     {roles.map(r => (

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   LogOut, Menu, Loader2, Building2, User, Shield, 
   BookOpen, GraduationCap, CalendarDays, ClipboardList, 
-  MessageSquare, Settings, Home, Bell, Users
+  MessageSquare, Settings, Home, Bell, Users, Briefcase,
+  ChevronDown, ChevronRight
 } from 'lucide-react';
 import StorageImage from '../components/StorageImage';
 import ModuleSchoolUsers from './modules/ModuleSchoolUsers';
@@ -148,9 +149,11 @@ export default function SchoolPortal() {
             <SidebarItem id="messages" icon={MessageSquare} label="Mensajes" />
 
             <div style={{ marginTop: '1.2rem', marginBottom: '0.3rem', paddingLeft: isCollapsed ? '0' : '1rem', textAlign: isCollapsed ? 'center' : 'left', fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {isCollapsed ? '—' : 'Administración'}
+              {isCollapsed ? '—' : 'Administración de usuarios'}
             </div>
             <SidebarItem id="school-users" icon={Users} label="Usuarios del Colegio" />
+            <SidebarItem id="profesor" icon={Briefcase} label="Profesor" />
+            <SidebarItem id="alumno" icon={GraduationCap} label="Estudiantes" />
           </nav>
         </aside>
 
@@ -276,8 +279,11 @@ export default function SchoolPortal() {
             </div>
           )}
 
-          {activeModule === 'school-users' && meData && (
-            <ModuleSchoolUsers schoolId={meData.school_id} />
+          {['school-users', 'profesor', 'alumno'].includes(activeModule) && meData && (
+            <ModuleSchoolUsers 
+              schoolId={meData.school_id} 
+              initialFilter={activeModule === 'profesor' ? 'profesor' : activeModule === 'alumno' ? 'alumno' : ''} 
+            />
           )}
 
           {/* Placeholder for future modules */}
