@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "react"],
+  "ignorePatterns": ["dist"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "eslint/no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^[A-Z_]"
+      }
+    ]
+  },
+  "env": {
+    "browser": true,
+    "builtin": true
+  },
+  "settings": {
+    "react": {
+      "version": "19.0"
+    }
+  }
+}
