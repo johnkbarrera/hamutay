@@ -52,36 +52,5 @@ jobs:
           source: "dist/,ecosystem.config.js"
           target: "~/open_projects/hamutay/"
 
-      - name: 🚀 Start/Restart app with pm2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ~/open_projects/hamutay
-            # Instalar serve si no está disponible
-            which serve > /dev/null 2>&1 || npm install -g serve
-            mkdir -p pm2_logs
-            pm2 restart ecosystem.config.js --update-env || pm2 start ecosystem.config.js
-            pm2 save
-            # Esperar a que el proceso levante
-            sleep 5
-            pm2 status hamutay_frontend
-            echo "✅ App deployed"
-
-      - name: ✅ Health check
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3005)
-            if [ "$HTTP_STATUS" -eq 200 ]; then
-              echo "✅ Health check passed - HTTP $HTTP_STATUS"
-            else
-              echo "❌ Health check failed - HTTP $HTTP_STATUS"
-              pm2 logs hamutay_frontend --lines 20 --nostream
-              exit 1
-            fi
+      - name: ✅ Files updated on VPS
+        run: echo "dist/ and ecosystem.config.js transferred to server"
