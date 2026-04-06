@@ -1,0 +1,110 @@
+name: 🚀 Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy to Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.24.0
+
+      - name: 📦 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: ✅ Validate package manager
+        run: pnpm run validate:pm
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Type check
+        run: pnpm run typecheck
+
+      - name: 🎨 Lint
+        run: pnpm run lint
+
+      - name: 🏗️ Build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL_PROD }}
+          VITE_APP_URL: ${{ secrets.VITE_APP_URL_PROD }}
+        run: pnpm run build
+
+      - name: 📤 Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/open_projects/hamutay
+            echo "Current commit before pull:"
+            git log --oneline -1
+            git fetch origin
+            git reset --hard origin/main
+            echo "Current commit after pull:"
+            git log --oneline -1
+
+      - name: 📦 Install & Build on Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/open_projects/hamutay
+            corepack enable
+            pnpm install --frozen-lockfile
+            VITE_API_URL=${{ secrets.VITE_API_URL_PROD }} \
+            VITE_APP_URL=${{ secrets.VITE_APP_URL_PROD }} \
+            pnpm run build
+
+      - name: 🚀 Deploy app with pm2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/open_projects/hamutay
+            # Backup current dist
+            [ -d dist ] && cp -r dist dist.backup.$(date +%Y%m%d_%H%M%S)
+            # Install serve if not present
+            npm list -g serve > /dev/null 2>&1 || npm install -g serve
+            # Create logs directory
+            mkdir -p pm2_logs
+            # Restart app with pm2 using ecosystem config
+            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
+            pm2 save
+            pm2 logs hamutay_frontend --lines 10
+            echo "✅ App deployed with pm2"
+
+      - name: ✅ Health check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sleep 3
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+            if [ "$HTTP_STATUS" -eq 200 ]; then
+              echo "✅ Health check passed - HTTP $HTTP_STATUS"
+            else
+              echo "❌ Health check failed - HTTP $HTTP_STATUS"
+              pm2 logs hamutay_frontend --lines 20
+              exit 1
+            fi
