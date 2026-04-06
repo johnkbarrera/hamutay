@@ -23,7 +23,7 @@ pnpm install
 pnpm run dev
 ```
 
-Por defecto Vite suele usar **http://localhost:5173**. Requisitos, build de producción y más: **[docs/setup.md](docs/setup.md)**.
+Por defecto el servidor de desarrollo corre en **http://localhost:3005**. Requisitos, build de producción y más: **[docs/setup.md](docs/setup.md)**.
 
 ## Deployment en Producción
 
