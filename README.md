@@ -23,7 +23,7 @@ pnpm install
 pnpm run dev
 ```
 
-Por defecto el servidor de desarrollo corre en **http://localhost:3005**. Requisitos, build de producción y más: **[docs/setup.md](docs/setup.md)**.
+Por defecto el servidor de desarrollo corre en **http://localhost:5173**. Requisitos, build de producción y más: **[docs/setup.md](docs/setup.md)**.
 
 ## Deployment en Producción
 
@@ -46,7 +46,7 @@ Las variables de entorno se pasan en el **workflow de GitHub Actions** (desde lo
 **Localmente (desarrollo):**
 Si necesitas testear la build localmente, usa:
 ```bash
-VITE_API_URL=http://localhost:8000 VITE_APP_URL=http://localhost:3005 pnpm run build
+VITE_API_URL=http://localhost:8000 VITE_APP_URL=http://localhost:5173 pnpm run build
 ```
 
 **Nota:** Las variables deben tener el prefijo `VITE_` para ser expuestas al cliente en tiempo de build (ver [Vite Envs](https://vitejs.dev/guide/env-and-modes.html)). No se usan en `.env` en el repositorio.
