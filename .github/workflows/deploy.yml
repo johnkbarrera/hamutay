@@ -63,6 +63,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "dist/,ecosystem.config.js"
           target: "~/open_projects/hamutay/"
+          overwrite: true
 
       - name: ✅ Files updated on VPS
         run: echo "dist/ and ecosystem.config.js transferred to server"
